@@ -160,6 +160,9 @@ class CompanionService : Service(), Choreographer.FrameCallback {
     // ------------------------------------------------------------------ setup
 
     /** False when Android refuses (e.g. a sticky restart while the app is in the background). */
+    // The main manifest declares foregroundServiceType="specialUse"; lint misreads the herald
+    // flavor's extra manifest (which only adds the listener service) and flags this call.
+    @SuppressLint("ForegroundServiceType")
     private fun startInForeground(): Boolean {
         val nm = getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(
