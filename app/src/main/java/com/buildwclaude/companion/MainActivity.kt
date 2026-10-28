@@ -95,6 +95,12 @@ class MainActivity : Activity(), Choreographer.FrameCallback {
         )
     }
 
+    private fun openAppInfo() {
+        startActivity(
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName"))
+        )
+    }
+
     private fun toggleCompanion() {
         if (!Settings.canDrawOverlays(this)) {
             openOverlaySettings()
@@ -168,6 +174,20 @@ class MainActivity : Activity(), Choreographer.FrameCallback {
                 ).also { it.setPadding(0, px(6), 0, px(12)) }
             )
             addView(button("Allow permission", filled = false) { openOverlaySettings() })
+            if (Build.VERSION.SDK_INT >= 33) {
+                // Sideloaded apps get "restricted settings": the toggle says access denied until unlocked.
+                addView(
+                    text(
+                        "Toggle greyed out or “access denied”? Android locks this for apps installed " +
+                            "from a downloaded APK. Open App info, tap ⋮ (top right) → " +
+                            "“Allow restricted settings”, then try again.",
+                        13f, SOFT
+                    ).also { it.setPadding(0, px(14), 0, px(10)) }
+                )
+                addView(button("Open App info", filled = false) { openAppInfo() }.apply {
+                    background = rounded(Color.TRANSPARENT, 30, ACCENT)
+                })
+            }
         }
         column.addView(permissionCard, spaced())
 

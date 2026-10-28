@@ -22,6 +22,7 @@ He's drawn from frames pre-rendered from the Blender model in the companion proj
 1. On the phone, open the **[latest release](../../releases/latest)** and tap **`knight-companion-latest.apk`** under **Assets**.
 2. Open the downloaded file. If Android says installing from your browser is blocked, tap **Settings**, turn on **Allow from this source**, go back and tap **Install**.
 3. Open **Knight Companion** and tap **Allow permission**. Find **Knight Companion** in the list and turn on **Display over other apps**.
+   - **If it says "access denied" or the toggle is greyed out:** Android locks this permission for apps installed from a downloaded APK ("restricted settings"). Go to **Settings → Apps → Knight Companion**, tap **⋮** (top right) → **Allow restricted settings**, confirm with your PIN or fingerprint, then turn the toggle on. The ⋮ option only appears after you've tried the toggle once.
 4. Go back and tap **Start patrol**. Allow notifications if asked. The notification is how Android keeps him running, and it has a **Send him home** button.
 
 Every build is signed with the same key (`app/companion-debug.p12`), so **a new APK installs over the old one** and keeps your settings.
