@@ -32,8 +32,17 @@ He's drawn from frames pre-rendered from the Blender model in the companion proj
 
 Every build is signed with the same key (`app/companion-debug.p12`), so **a new APK installs over the old one** and keeps your settings.
 
-### Turning on the herald
-In the app, tick **Herald** and turn on **Knight Companion** under notification access. If Android says access is restricted, it's the same fix as above (**⋮ → Allow restricted settings** in App info).
+### Two editions
+| File | What's in it | Installs from the browser? |
+|---|---|---|
+| `knight-companion-latest.apk` | Everything except the herald | Yes |
+| `knight-companion-herald.apk` | Everything **plus** the notification herald | Blocked by Play Protect in some countries (e.g. India) |
+
+Google Play Protect's *enhanced fraud protection* refuses to install a downloaded APK that declares a notification listener ("requests access to sensitive data"), and the herald needs one. Both editions use the same package and key, so either installs over the other and keeps your settings. To get the herald edition, either:
+- **From a computer:** enable USB debugging and run `adb install -r knight-companion-herald.apk` (Play Protect's sideload block doesn't apply to adb), or
+- **On the phone:** Play Store → profile → **Play Protect** → ⚙ → turn off **Scan apps with Play Protect**, install, then turn it back on.
+
+Then in the app tick **Herald** and turn on **Knight Companion** under notification access (if it's restricted: **App info → ⋮ → Allow restricted settings**).
 
 ### If he disappears after a while
 Nothing OS can close background apps to save battery. Go to **Settings → Apps → Knight Companion → Battery** and choose **Unrestricted**.

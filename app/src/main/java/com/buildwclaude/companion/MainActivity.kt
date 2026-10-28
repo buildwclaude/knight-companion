@@ -36,7 +36,7 @@ class MainActivity : Activity(), Choreographer.FrameCallback {
     private lateinit var previewSprites: Sprites
     private lateinit var permissionCard: View
     private lateinit var startButton: Button
-    private lateinit var heraldAccess: View
+    private var heraldAccess: View? = null
     private lateinit var breakRow: View
     private var previewClock = 0f
     private var cheerUntil = 0f
@@ -89,7 +89,7 @@ class MainActivity : Activity(), Choreographer.FrameCallback {
     private fun refresh() {
         val allowed = Settings.canDrawOverlays(this)
         permissionCard.visibility = if (allowed) View.GONE else View.VISIBLE
-        heraldAccess.visibility =
+        heraldAccess?.visibility =
             if (prefs.herald && !HeraldService.hasAccess(this)) View.VISIBLE else View.GONE
         startButton.text = if (CompanionService.running) "Send him home" else "Start patrol"
         startButton.alpha = if (allowed) 1f else 0.4f
@@ -247,25 +247,36 @@ class MainActivity : Activity(), Choreographer.FrameCallback {
                 .also { it.setPadding(0, px(6), 0, px(4)) }
         )
 
-        column.addView(check("Herald: announce new messages", prefs.herald) {
-            prefs.herald = it
-            if (it && !HeraldService.hasAccess(this)) openListenerSettings()
-            refresh()
-        }, spaced(12))
-        heraldAccess = card().apply {
-            addView(
+        if (BuildConfig.HERALD) {
+            column.addView(check("Herald: announce new messages", prefs.herald) {
+                prefs.herald = it
+                if (it && !HeraldService.hasAccess(this)) openListenerSettings()
+                refresh()
+            }, spaced(12))
+            val accessCard = card().apply {
+                addView(
+                    text(
+                        "Needs notification access so he can see what arrives. Turn on \u201cKnight Companion\u201d " +
+                            "in the list. Nothing leaves your phone.",
+                        14f, Color.WHITE
+                    ).also { it.setPadding(0, 0, 0, px(10)) }
+                )
+                addView(button("Grant notification access", filled = false) { openListenerSettings() })
+            }
+            column.addView(accessCard, spaced(8))
+            heraldAccess = accessCard
+            column.addView(check("Show message text in his scroll", prefs.heraldPreview) {
+                prefs.heraldPreview = it
+            })
+        } else {
+            column.addView(
                 text(
-                    "Needs notification access so he can see what arrives. Turn on \u201cKnight Companion\u201d " +
-                        "in the list. Nothing leaves your phone.",
-                    14f, Color.WHITE
-                ).also { it.setPadding(0, 0, 0, px(10)) }
+                    "\uD83D\uDCDC Herald (announcing new messages) is in the separate herald edition: " +
+                        "Play Protect blocks installing a downloaded app that reads notifications. See the README.",
+                    13f, MUTED
+                ).also { it.setPadding(0, px(14), 0, 0) }
             )
-            addView(button("Grant notification access", filled = false) { openListenerSettings() })
         }
-        column.addView(heraldAccess, spaced(8))
-        column.addView(check("Show message text in his scroll", prefs.heraldPreview) {
-            prefs.heraldPreview = it
-        })
 
         column.addView(check("Break & stretch nudges", prefs.breaks) {
             prefs.breaks = it

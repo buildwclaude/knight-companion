@@ -11,8 +11,23 @@ android {
         applicationId = "com.buildwclaude.companion"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "0.3.0"
+    }
+
+    // Play Protect blocks sideloading apps that declare a notification listener, so the herald
+    // (which needs one) ships as its own edition. Same package + key: either installs over the other.
+    flavorDimensions += "edition"
+    productFlavors {
+        create("standard") {
+            dimension = "edition"
+            buildConfigField("boolean", "HERALD", "false")
+        }
+        create("herald") {
+            dimension = "edition"
+            buildConfigField("boolean", "HERALD", "true")
+            versionNameSuffix = "-herald"
+        }
     }
 
     signingConfigs {
@@ -47,6 +62,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
+    }
+    buildFeatures {
+        buildConfig = true
     }
 
     lint {

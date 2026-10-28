@@ -32,17 +32,21 @@ jobs:
       - name: Set up Gradle (with caching)
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Assemble debug APK
-        run: ./gradlew assembleDebug --stacktrace
+      - name: Assemble debug APKs (standard + herald editions)
+        run: ./gradlew assembleStandardDebug assembleHeraldDebug --stacktrace
 
-      - name: Rename APK
-        run: cp app/build/outputs/apk/debug/app-debug.apk knight-companion-latest.apk
+      - name: Rename APKs
+        run: |
+          cp app/build/outputs/apk/standard/debug/app-standard-debug.apk knight-companion-latest.apk
+          cp app/build/outputs/apk/herald/debug/app-herald-debug.apk knight-companion-herald.apk
 
       - name: Upload APK as a workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: knight-companion-debug-apk
-          path: knight-companion-latest.apk
+          path: |
+            knight-companion-latest.apk
+            knight-companion-herald.apk
           if-no-files-found: error
 
   # 2. Android Lint, in parallel. A lint error fails the pipeline.
@@ -63,14 +67,14 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Run lint
-        run: ./gradlew lintDebug --stacktrace
+        run: ./gradlew lintStandardDebug lintHeraldDebug --stacktrace
 
       - name: Upload lint report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: lint-report
-          path: app/build/reports/lint-results-debug.html
+          path: app/build/reports/lint-results-*.html
           if-no-files-found: ignore
 
   # 3. Publish the APK to a rolling "latest" release, only after build AND lint pass.
@@ -95,10 +99,12 @@ jobs:
           SHORT_SHA=$(git rev-parse --short HEAD)
           NOTES="Automatic debug build from commit ${SHORT_SHA} on $(date -u '+%Y-%m-%d %H:%M UTC').
 
-          **How to install:** download \`knight-companion-latest.apk\` below on your phone and open it. You may need to allow your browser to install unknown apps (see the README)."
+          **How to install:** download \`knight-companion-latest.apk\` below on your phone and open it. You may need to allow your browser to install unknown apps (see the README).
+
+          \`knight-companion-herald.apk\` adds the notification herald. Play Protect blocks sideloading it in some countries; see the README for how to install it."
           gh release delete latest --yes --repo "$GITHUB_REPOSITORY" 2>/dev/null || true
           git push --delete origin latest 2>/dev/null || true
-          gh release create latest knight-companion-latest.apk \
+          gh release create latest knight-companion-latest.apk knight-companion-herald.apk \
             --repo "$GITHUB_REPOSITORY" \
             --target "$GITHUB_SHA" \
             --title "Latest build ($SHORT_SHA)" \
