@@ -5,8 +5,13 @@ A tiny 3D knight who lives on your Android screen. He patrols the status bar (pa
 ![The knight](docs/knight.png)
 
 - **Tap him** and he cheers with his sword raised.
+- **Hold him** for the quick menu: focus timer and reminders.
 - **Drag him** anywhere. In status-bar mode he hops back up onto the bar when you let go.
-- **Settings:** status bar or whole screen, size, and walking speed.
+
+### His jobs
+- **⏰ Focus timer & reminders.** Focus for 25/50 min (he wears a countdown pill), a 5-min break, or "remind me to… in 5/15/30/60 min or at a time". When it's due he raises his sword with a speech bubble *and* you get a ringing notification, so it works with the screen off too. Reminders survive reboots.
+- **📜 Herald.** When a message arrives he runs to the middle of the screen holding a scroll with the app, sender and a preview. Tap the scroll to open it. Silent/low-priority notifications, media, calls and progress bars are ignored. You can hide message text. Needs *notification access*, and nothing leaves the phone.
+- **💧 Break nudges.** After 30 min (adjustable) of continuous screen time he suggests water, a stretch, resting your eyes or a short walk. A minute with the screen off resets the count.
 
 He's drawn from frames pre-rendered from the Blender model in the companion project (`knight/sprites_knight.py`), so he looks exactly like the renders and costs almost no battery.
 
@@ -26,6 +31,9 @@ He's drawn from frames pre-rendered from the Blender model in the companion proj
 4. Go back and tap **Start patrol**. Allow notifications if asked. The notification is how Android keeps him running, and it has a **Send him home** button.
 
 Every build is signed with the same key (`app/companion-debug.p12`), so **a new APK installs over the old one** and keeps your settings.
+
+### Turning on the herald
+In the app, tick **Herald** and turn on **Knight Companion** under notification access. If Android says access is restricted, it's the same fix as above (**⋮ → Allow restricted settings** in App info).
 
 ### If he disappears after a while
 Nothing OS can close background apps to save battery. Go to **Settings → Apps → Knight Companion → Battery** and choose **Unrestricted**.

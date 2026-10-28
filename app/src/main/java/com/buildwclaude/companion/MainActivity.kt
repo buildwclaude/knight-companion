@@ -2,6 +2,7 @@ package com.buildwclaude.companion
 
 import android.Manifest
 import android.app.Activity
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -17,6 +18,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
@@ -34,6 +36,8 @@ class MainActivity : Activity(), Choreographer.FrameCallback {
     private lateinit var previewSprites: Sprites
     private lateinit var permissionCard: View
     private lateinit var startButton: Button
+    private lateinit var heraldAccess: View
+    private lateinit var breakRow: View
     private var previewClock = 0f
     private var cheerUntil = 0f
     private var lastNanos = 0L
@@ -85,6 +89,8 @@ class MainActivity : Activity(), Choreographer.FrameCallback {
     private fun refresh() {
         val allowed = Settings.canDrawOverlays(this)
         permissionCard.visibility = if (allowed) View.GONE else View.VISIBLE
+        heraldAccess.visibility =
+            if (prefs.herald && !HeraldService.hasAccess(this)) View.VISIBLE else View.GONE
         startButton.text = if (CompanionService.running) "Send him home" else "Start patrol"
         startButton.alpha = if (allowed) 1f else 0.4f
     }
@@ -93,6 +99,20 @@ class MainActivity : Activity(), Choreographer.FrameCallback {
         startActivity(
             Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName"))
         )
+    }
+
+    private fun openListenerSettings() {
+        val intent = if (Build.VERSION.SDK_INT >= 30) {
+            Intent(Settings.ACTION_NOTIFICATION_LISTENER_DETAIL_SETTINGS).putExtra(
+                Settings.EXTRA_NOTIFICATION_LISTENER_COMPONENT_NAME,
+                ComponentName(this, HeraldService::class.java).flattenToString()
+            )
+        } else {
+            Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+        }
+        runCatching { startActivity(intent) }.onFailure {
+            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        }
     }
 
     private fun openAppInfo() {
@@ -191,6 +211,7 @@ class MainActivity : Activity(), Choreographer.FrameCallback {
         }
         column.addView(permissionCard, spaced())
 
+
         // where he walks
         column.addView(section("WHERE HE WALKS"))
         val group = RadioGroup(this)
@@ -215,6 +236,47 @@ class MainActivity : Activity(), Choreographer.FrameCallback {
             prefs.speedDp = it
             pushSettings()
         })
+
+        // ---- jobs
+        column.addView(section("HIS JOBS"))
+        column.addView(button("Focus timer & reminders", filled = false) {
+            startActivity(Intent(this, QuickActivity::class.java))
+        })
+        column.addView(
+            text("Or hold the knight anywhere on screen to open this.", 13f, MUTED)
+                .also { it.setPadding(0, px(6), 0, px(4)) }
+        )
+
+        column.addView(check("Herald: announce new messages", prefs.herald) {
+            prefs.herald = it
+            if (it && !HeraldService.hasAccess(this)) openListenerSettings()
+            refresh()
+        }, spaced(12))
+        heraldAccess = card().apply {
+            addView(
+                text(
+                    "Needs notification access so he can see what arrives. Turn on \u201cKnight Companion\u201d " +
+                        "in the list. Nothing leaves your phone.",
+                    14f, Color.WHITE
+                ).also { it.setPadding(0, 0, 0, px(10)) }
+            )
+            addView(button("Grant notification access", filled = false) { openListenerSettings() })
+        }
+        column.addView(heraldAccess, spaced(8))
+        column.addView(check("Show message text in his scroll", prefs.heraldPreview) {
+            prefs.heraldPreview = it
+        })
+
+        column.addView(check("Break & stretch nudges", prefs.breaks) {
+            prefs.breaks = it
+            breakRow.alpha = if (it) 1f else 0.4f
+        }, spaced(12))
+        breakRow = slider(Prefs.BREAK_MIN, Prefs.BREAK_MAX, prefs.breakMin, "min") { prefs.breakMin = it }
+        breakRow.alpha = if (prefs.breaks) 1f else 0.4f
+        column.addView(breakRow)
+        column.addView(
+            text("After this long of continuous screen time he suggests water, a stretch or a walk.", 13f, MUTED)
+        )
 
         startButton = button("Start patrol", filled = true) { toggleCompanion() }
         column.addView(startButton, spaced(28))
@@ -275,6 +337,15 @@ class MainActivity : Activity(), Choreographer.FrameCallback {
     private fun spaced(topDp: Int = 20) =
         LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
             .apply { topMargin = px(topDp) }
+
+    private fun check(label: String, checked: Boolean, onChange: (Boolean) -> Unit) = CheckBox(this).apply {
+        text = label
+        isChecked = checked
+        setTextColor(Color.WHITE)
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
+        setPadding(px(8), px(8), 0, px(8))
+        setOnCheckedChangeListener { _, on -> onChange(on) }
+    }
 
     private fun radio(label: String, viewId: Int) = RadioButton(this).apply {
         id = viewId

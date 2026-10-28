@@ -11,4 +11,12 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@color/ink</item>
     </style>
+
+    <!-- Quick menu opened by holding the knight: floats over whatever app is open -->
+    <style name="Theme.Companion.Quick" parent="android:Theme.Material.Dialog.NoActionBar">
+        <item name="android:windowBackground">@drawable/dialog_bg</item>
+        <item name="android:colorAccent">@color/crest_blue</item>
+        <item name="android:windowCloseOnTouchOutside">true</item>
+        <item name="android:backgroundDimAmount">0.45</item>
+    </style>
 </resources>
