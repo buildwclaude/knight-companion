@@ -1,0 +1,16 @@
+{
+  "width": 208,
+  "height": 294,
+  "footY": 0.9794,
+  "fps": {
+    "walk": 12,
+    "idle": 6,
+    "cheer": 6
+  },
+  "frames": {
+    "cheer": 24,
+    "walk": 12,
+    "idle": 12
+  },
+  "unitsPerHeight": 2.6643749999999997
+}

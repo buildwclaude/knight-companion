@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ink">#FF0E0F14</color>
+    <color name="crest_blue">#FF4E6BB5</color>
+    <color name="icon_bg">#FF4E6BB5</color>
+
+    <style name="Theme.Companion" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/ink</item>
+        <item name="android:colorAccent">@color/crest_blue</item>
+        <item name="android:colorPrimary">@color/crest_blue</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/ink</item>
+    </style>
+</resources>
